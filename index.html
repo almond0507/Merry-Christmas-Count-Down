@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Christmas Countdown</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
@@ -19,10 +19,12 @@
 
         body {
             font-family: 'Nunito', sans-serif;
-            overflow: hidden;
+            overflow: hidden; /* Prevent scrolling */
             background: var(--bg-gradient);
             color: var(--text-main);
             transition: background 1s ease, color 0.5s ease;
+            height: 100vh; /* Fix for mobile browser height */
+            width: 100vw;
         }
 
         .christmas-font {
@@ -40,7 +42,7 @@
 
         /* --- Mascot Animations --- */
         .mascot-container {
-            font-size: 6rem; /* Made slightly larger */
+            font-size: 5rem;
             filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
             transition: all 0.5s ease;
             display: inline-block;
@@ -48,40 +50,17 @@
             cursor: pointer;
         }
         
-        .mascot-container:hover {
-            transform: scale(1.2) !important;
+        .mascot-container:active {
+            transform: scale(0.9) !important;
         }
 
         /* Animations */
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-25px); }
-        }
-        @keyframes wobble {
-            0%, 100% { transform: rotate(-5deg); }
-            50% { transform: rotate(5deg); }
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(5deg); }
-        }
-        @keyframes dance {
-            0%, 100% { transform: skew(0deg); }
-            25% { transform: skew(-10deg); }
-            75% { transform: skew(10deg); }
-        }
-        @keyframes pulse-glow {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px white); }
-            50% { transform: scale(1.1); filter: drop-shadow(0 0 20px yellow); }
-        }
-        @keyframes slide {
-            0%, 100% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes wobble { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-15px) rotate(5deg); } }
+        @keyframes dance { 0%, 100% { transform: skew(0deg); } 25% { transform: skew(-10deg); } 75% { transform: skew(10deg); } }
+        @keyframes pulse-glow { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px white); } 50% { transform: scale(1.1); filter: drop-shadow(0 0 20px yellow); } }
 
         .anim-bounce { animation: bounce 2s infinite ease-in-out; }
         .anim-wobble { animation: wobble 3s infinite ease-in-out; }
@@ -89,22 +68,26 @@
         .anim-float { animation: float 4s infinite ease-in-out; }
         .anim-dance { animation: dance 2s infinite cubic-bezier(0.4, 0, 0.2, 1); }
         .anim-pulse { animation: pulse-glow 2s infinite ease-in-out; }
-        .anim-slide { animation: slide 3s infinite ease-in-out; }
 
-        /* Theme Selector UI */
+        /* Theme Selector UI - Mobile Optimized */
         .theme-panel {
-            transform: translateX(120%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
         }
+        
         .theme-panel.open {
-            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
         }
 
         .theme-btn {
             transition: transform 0.2s;
         }
-        .theme-btn:hover {
-            transform: scale(1.05);
+        .theme-btn:active {
+            transform: scale(0.9);
         }
         
         .custom-scroll::-webkit-scrollbar { width: 4px; }
@@ -116,93 +99,87 @@
             transition: color 0.5s ease;
         }
 
-        /* Icon Button Hover Effect */
-        .icon-btn:hover svg {
-            transform: scale(1.1);
-        }
-        .icon-btn svg {
-            transition: transform 0.2s;
+        /* Responsive Text Sizing */
+        @media (max-width: 640px) {
+            .countdown-number { font-size: 2.5rem; }
+            .countdown-label { font-size: 0.7rem; }
+            .mascot-container { font-size: 4rem; }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center relative">
+<body class="flex flex-col items-center justify-center relative h-full w-full">
 
     <!-- Canvas for Snow Effect -->
     <canvas id="snowCanvas" class="absolute top-0 left-0 w-full h-full pointer-events-none z-0"></canvas>
 
-    <!-- Controls Container (Top Right) -->
-    <div class="absolute top-6 right-6 z-50 flex gap-3">
-        <!-- Theme Toggle -->
-        <button onclick="toggleThemePanel()" class="icon-btn p-3 glass-card rounded-full hover:bg-white/20 transition-all group" title="Change Theme">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white group-hover:rotate-90 transition-transform duration-500">
-                <circle cx="13.5" cy="6.5" r=".5"></circle>
-                <circle cx="17.5" cy="10.5" r=".5"></circle>
-                <circle cx="8.5" cy="7.5" r=".5"></circle>
-                <circle cx="6.5" cy="12.5" r=".5"></circle>
-                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
-            </svg>
-        </button>
-    </div>
+    <!-- Theme Toggle Button (Top Right) -->
+    <button onclick="toggleThemePanel()" class="absolute top-4 right-4 z-50 p-3 glass-card rounded-full hover:bg-white/20 active:scale-90 transition-all shadow-lg" title="Change Theme">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+            <circle cx="13.5" cy="6.5" r=".5"></circle>
+            <circle cx="17.5" cy="10.5" r=".5"></circle>
+            <circle cx="8.5" cy="7.5" r=".5"></circle>
+            <circle cx="6.5" cy="12.5" r=".5"></circle>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+        </svg>
+    </button>
 
-    <!-- Theme Panel -->
-    <div id="themePanel" class="theme-panel absolute top-20 right-6 z-50 glass-card p-4 rounded-xl w-64 max-h-[80vh] overflow-y-auto custom-scroll flex flex-col gap-3">
-        <h3 class="text-sm font-bold uppercase tracking-wider mb-2 text-center border-b border-white/20 pb-2">Select Theme</h3>
-        <div class="grid grid-cols-2 gap-3" id="themeGrid">
+    <!-- Theme Panel (Centered Modal Style for Mobile) -->
+    <div id="themePanelOverlay" onclick="toggleThemePanel()" class="fixed inset-0 bg-black/50 z-40 hidden backdrop-blur-sm"></div>
+    <div id="themePanel" class="theme-panel fixed z-50 glass-card p-4 rounded-xl w-[90%] max-w-sm max-h-[70vh] overflow-y-auto custom-scroll flex flex-col gap-3 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-2xl border border-white/30">
+        <div class="flex justify-between items-center border-b border-white/20 pb-2 mb-2">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-white">Select Theme</h3>
+            <button onclick="toggleThemePanel()" class="text-white hover:text-red-300">✕</button>
+        </div>
+        <div class="grid grid-cols-3 gap-3" id="themeGrid">
             <!-- JS will populate this -->
         </div>
     </div>
 
     <!-- Main Content -->
-    <div class="z-10 text-center px-4 w-full max-w-4xl transition-all duration-500 flex flex-col items-center">
+    <div class="z-10 text-center px-4 w-full max-w-4xl transition-all duration-500 flex flex-col items-center justify-center h-full">
         
-        <!-- Header -->
-        <div class="mb-8 relative w-full">
-            <h1 class="christmas-font text-5xl md:text-7xl lg:text-8xl font-bold mb-4 drop-shadow-lg">
-                Christmas Countdown
+        <!-- Header Section -->
+        <div class="flex flex-col items-center justify-center mb-6">
+            <h1 class="christmas-font text-5xl md:text-7xl lg:text-8xl font-bold mb-2 drop-shadow-lg leading-tight">
+                Christmas<br>Countdown
             </h1>
-            <div class="text-xl md:text-2xl accent-text font-light tracking-widest uppercase">
+            <div class="text-sm md:text-xl accent-text font-bold tracking-widest uppercase mb-4">
                 Time until Santa arrives
             </div>
             
-            <!-- MASCOT CONTAINER -->
-            <div class="mt-8 h-32 flex items-center justify-center">
-                <div id="themeMascot" class="mascot-container anim-float" title="Click me!">
-                    🦉
-                </div>
+            <!-- MASCOT -->
+            <div id="themeMascot" class="mascot-container anim-float select-none" onclick="pokeMascot()">
+                🦉
             </div>
         </div>
 
         <!-- Countdown Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 w-full max-w-4xl">
-            
+        <div class="grid grid-cols-2 gap-3 w-full max-w-sm md:max-w-2xl">
             <!-- Days -->
-            <div class="countdown-item glass-card rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
-                <span id="days" class="text-5xl md:text-7xl font-bold mb-2 font-mono">00</span>
-                <span class="text-sm md:text-lg uppercase tracking-wider accent-text font-bold">Days</span>
+            <div class="glass-card rounded-xl p-3 md:p-6 flex flex-col items-center justify-center">
+                <span id="days" class="countdown-number text-4xl md:text-7xl font-bold mb-1 font-mono">00</span>
+                <span class="countdown-label text-xs md:text-lg uppercase tracking-wider accent-text font-bold">Days</span>
             </div>
-
             <!-- Hours -->
-            <div class="countdown-item glass-card rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
-                <span id="hours" class="text-5xl md:text-7xl font-bold mb-2 font-mono">00</span>
-                <span class="text-sm md:text-lg uppercase tracking-wider accent-text font-bold">Hours</span>
+            <div class="glass-card rounded-xl p-3 md:p-6 flex flex-col items-center justify-center">
+                <span id="hours" class="countdown-number text-4xl md:text-7xl font-bold mb-1 font-mono">00</span>
+                <span class="countdown-label text-xs md:text-lg uppercase tracking-wider accent-text font-bold">Hours</span>
             </div>
-
             <!-- Minutes -->
-            <div class="countdown-item glass-card rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
-                <span id="minutes" class="text-5xl md:text-7xl font-bold mb-2 font-mono">00</span>
-                <span class="text-sm md:text-lg uppercase tracking-wider accent-text font-bold">Minutes</span>
+            <div class="glass-card rounded-xl p-3 md:p-6 flex flex-col items-center justify-center">
+                <span id="minutes" class="countdown-number text-4xl md:text-7xl font-bold mb-1 font-mono">00</span>
+                <span class="countdown-label text-xs md:text-lg uppercase tracking-wider accent-text font-bold">Minutes</span>
             </div>
-
             <!-- Seconds -->
-            <div class="countdown-item glass-card rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
-                <span id="seconds" class="text-5xl md:text-7xl font-bold accent-text mb-2 font-mono">00</span>
-                <span class="text-sm md:text-lg uppercase tracking-wider font-bold opacity-80">Seconds</span>
+            <div class="glass-card rounded-xl p-3 md:p-6 flex flex-col items-center justify-center">
+                <span id="seconds" class="countdown-number text-4xl md:text-7xl font-bold accent-text mb-1 font-mono">00</span>
+                <span class="countdown-label text-xs md:text-lg uppercase tracking-wider font-bold opacity-80">Seconds</span>
             </div>
         </div>
 
         <!-- Footer Message -->
-        <div class="mt-12 text-sm md:text-base font-light glass-card inline-block px-8 py-3 rounded-full shadow-lg">
-            <span class="mr-2">✨</span> Wishing you joy and happiness <span class="ml-2">✨</span>
+        <div class="mt-8 text-xs md:text-base font-light glass-card inline-block px-6 py-2 rounded-full shadow-lg">
+            <span class="mr-1">✨</span> Wishing you joy <span class="ml-1">✨</span>
         </div>
 
     </div>
@@ -210,207 +187,21 @@
     <script>
         // --- Theme Configuration ---
         const themes = [
-            {
-                name: "Silent Night",
-                gradient: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-                textMain: "#ffffff",
-                textAccent: "#fca5a5", 
-                cardBg: "rgba(255, 255, 255, 0.1)",
-                snowColor: "rgba(255, 255, 255, 0.8)",
-                preview: "#0f172a",
-                mascot: "🦉",
-                anim: "anim-float"
-            },
-            {
-                name: "Santa's Suit",
-                gradient: "linear-gradient(135deg, #991b1b 0%, #ef4444 100%)",
-                textMain: "#ffffff",
-                textAccent: "#fcd34d",
-                cardBg: "rgba(0, 0, 0, 0.2)",
-                snowColor: "rgba(255, 255, 255, 0.9)",
-                preview: "#ef4444",
-                mascot: "🎅",
-                anim: "anim-bounce"
-            },
-            {
-                name: "Evergreen",
-                gradient: "linear-gradient(135deg, #064e3b 0%, #10b981 100%)",
-                textMain: "#ffffff",
-                textAccent: "#86efac",
-                cardBg: "rgba(0, 0, 0, 0.25)",
-                snowColor: "rgba(255, 255, 255, 0.7)",
-                preview: "#064e3b",
-                mascot: "🦌",
-                anim: "anim-float"
-            },
-            {
-                name: "Winter Wonderland",
-                gradient: "linear-gradient(135deg, #cffafe 0%, #3b82f6 100%)",
-                textMain: "#1e3a8a", 
-                textAccent: "#2563eb",
-                cardBg: "rgba(255, 255, 255, 0.4)",
-                snowColor: "rgba(255, 255, 255, 1)",
-                cardBorder: "rgba(255,255,255,0.8)",
-                preview: "#cffafe",
-                mascot: "⛄",
-                anim: "anim-wobble"
-            },
-            {
-                name: "Midnight Gold",
-                gradient: "linear-gradient(135deg, #000000 0%, #434343 100%)",
-                textMain: "#ffd700",
-                textAccent: "#e2e8f0", 
-                cardBg: "rgba(255, 215, 0, 0.1)",
-                snowColor: "rgba(255, 215, 0, 0.6)", 
-                preview: "#292929",
-                mascot: "🎺",
-                anim: "anim-pulse"
-            },
-            {
-                name: "Candy Cane",
-                gradient: "linear-gradient(135deg, #be123c 0%, #fda4af 50%, #be123c 100%)",
-                textMain: "#ffffff",
-                textAccent: "#fff1f2",
-                cardBg: "rgba(255, 255, 255, 0.2)",
-                snowColor: "rgba(255, 255, 255, 0.9)",
-                preview: "repeating-linear-gradient(45deg, #be123c, #be123c 10px, #fda4af 10px, #fda4af 20px)",
-                mascot: "🍬",
-                anim: "anim-spin"
-            },
-            {
-                name: "Aurora Borealis",
-                gradient: "linear-gradient(135deg, #4c1d95 0%, #0891b2 100%)",
-                textMain: "#ffffff",
-                textAccent: "#22d3ee",
-                cardBg: "rgba(0, 0, 0, 0.2)",
-                snowColor: "rgba(165, 243, 252, 0.8)",
-                preview: "#4c1d95",
-                mascot: "🐻‍❄️",
-                anim: "anim-float"
-            },
-            {
-                name: "Cozy Hearth",
-                gradient: "linear-gradient(135deg, #7c2d12 0%, #ea580c 100%)",
-                textMain: "#fff7ed",
-                textAccent: "#fbbf24",
-                cardBg: "rgba(0, 0, 0, 0.2)",
-                snowColor: "rgba(255, 237, 213, 0.6)",
-                preview: "#ea580c",
-                mascot: "🧦",
-                anim: "anim-wobble"
-            },
-            {
-                name: "Gingerbread",
-                gradient: "linear-gradient(135deg, #5d4037 0%, #8d6e63 100%)",
-                textMain: "#ffffff",
-                textAccent: "#a7f3d0", 
-                cardBg: "rgba(255, 255, 255, 0.15)",
-                snowColor: "rgba(255, 235, 205, 0.7)", 
-                preview: "#5d4037",
-                mascot: "🍪",
-                anim: "anim-bounce"
-            },
-            {
-                name: "Sugar Plum",
-                gradient: "linear-gradient(135deg, #4a044e 0%, #c026d3 100%)",
-                textMain: "#fae8ff",
-                textAccent: "#f0abfc",
-                cardBg: "rgba(255, 255, 255, 0.15)",
-                snowColor: "rgba(245, 208, 254, 0.8)", 
-                preview: "#4a044e",
-                mascot: "🧚‍♀️",
-                anim: "anim-spin"
-            },
-            {
-                name: "Elf Workshop",
-                gradient: "linear-gradient(135deg, #15803d 0%, #b91c1c 100%)", 
-                textMain: "#ffffff",
-                textAccent: "#fde047", 
-                cardBg: "rgba(255, 255, 255, 0.2)",
-                snowColor: "rgba(255, 255, 255, 0.9)",
-                preview: "linear-gradient(45deg, #15803d 50%, #b91c1c 50%)",
-                mascot: "🧝",
-                anim: "anim-dance"
-            },
-            {
-                name: "Starry Night",
-                gradient: "linear-gradient(135deg, #020617 0%, #172554 100%)",
-                textMain: "#ffffff",
-                textAccent: "#fde047", 
-                cardBg: "rgba(30, 58, 138, 0.3)",
-                snowColor: "rgba(255, 255, 255, 0.6)",
-                preview: "#020617",
-                mascot: "🌠",
-                anim: "anim-pulse"
-            },
-            {
-                name: "Frozen Lake",
-                gradient: "linear-gradient(135deg, #ecfeff 0%, #0891b2 100%)",
-                textMain: "#0e7490",
-                textAccent: "#155e75",
-                cardBg: "rgba(255, 255, 255, 0.6)",
-                cardBorder: "rgba(255,255,255,0.9)",
-                snowColor: "rgba(255, 255, 255, 1)",
-                preview: "#ecfeff",
-                mascot: "⛸️",
-                anim: "anim-dance"
-            },
-            {
-                name: "Rudolph's Red",
-                gradient: "linear-gradient(135deg, #451a03 0%, #7f1d1d 100%)",
-                textMain: "#fef2f2",
-                textAccent: "#f87171",
-                cardBg: "rgba(0, 0, 0, 0.3)",
-                snowColor: "rgba(255, 255, 255, 0.8)",
-                preview: "#451a03",
-                mascot: "🔴",
-                anim: "anim-pulse"
-            },
-            {
-                name: "Holiday Lights",
-                gradient: "linear-gradient(135deg, #09090b 0%, #27272a 100%)",
-                textMain: "#ffffff",
-                textAccent: "#22c55e",
-                cardBg: "rgba(50, 50, 50, 0.5)",
-                snowColor: "rgba(255, 255, 0, 0.5)", 
-                preview: "#27272a",
-                mascot: "💡",
-                anim: "anim-pulse"
-            },
-            // --- NEW MASCOTS & THEMES ---
-            {
-                name: "Penguin Parade",
-                gradient: "linear-gradient(135deg, #1e293b 0%, #38bdf8 100%)",
-                textMain: "#f0f9ff",
-                textAccent: "#fdba74",
-                cardBg: "rgba(255, 255, 255, 0.2)",
-                snowColor: "rgba(255, 255, 255, 0.9)",
-                preview: "#38bdf8",
-                mascot: "🐧",
-                anim: "anim-slide"
-            },
-            {
-                name: "Present Surprise",
-                gradient: "linear-gradient(135deg, #4338ca 0%, #a855f7 100%)",
-                textMain: "#ffffff",
-                textAccent: "#fde047",
-                cardBg: "rgba(255, 255, 255, 0.15)",
-                snowColor: "rgba(230, 230, 250, 0.8)",
-                preview: "#a855f7",
-                mascot: "🎁",
-                anim: "anim-bounce"
-            },
-            {
-                name: "Sleigh Ride",
-                gradient: "linear-gradient(135deg, #881337 0%, #1e1b4b 100%)",
-                textMain: "#ffe4e6",
-                textAccent: "#fda4af",
-                cardBg: "rgba(255, 255, 255, 0.1)",
-                snowColor: "rgba(255, 255, 255, 0.7)",
-                preview: "#881337",
-                mascot: "🛷",
-                anim: "anim-slide"
-            }
+            { name: "Silent Night", gradient: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", textMain: "#ffffff", textAccent: "#fca5a5", cardBg: "rgba(255, 255, 255, 0.1)", snowColor: "rgba(255, 255, 255, 0.8)", preview: "#0f172a", mascot: "🦉", anim: "anim-float" },
+            { name: "Santa's Suit", gradient: "linear-gradient(135deg, #991b1b 0%, #ef4444 100%)", textMain: "#ffffff", textAccent: "#fcd34d", cardBg: "rgba(0, 0, 0, 0.2)", snowColor: "rgba(255, 255, 255, 0.9)", preview: "#ef4444", mascot: "🎅", anim: "anim-bounce" },
+            { name: "Evergreen", gradient: "linear-gradient(135deg, #064e3b 0%, #10b981 100%)", textMain: "#ffffff", textAccent: "#86efac", cardBg: "rgba(0, 0, 0, 0.25)", snowColor: "rgba(255, 255, 255, 0.7)", preview: "#064e3b", mascot: "🦌", anim: "anim-float" },
+            { name: "Winter", gradient: "linear-gradient(135deg, #cffafe 0%, #3b82f6 100%)", textMain: "#1e3a8a", textAccent: "#2563eb", cardBg: "rgba(255, 255, 255, 0.4)", snowColor: "rgba(255, 255, 255, 1)", cardBorder: "rgba(255,255,255,0.8)", preview: "#cffafe", mascot: "⛄", anim: "anim-wobble" },
+            { name: "Midnight Gold", gradient: "linear-gradient(135deg, #000000 0%, #434343 100%)", textMain: "#ffd700", textAccent: "#e2e8f0", cardBg: "rgba(255, 215, 0, 0.1)", snowColor: "rgba(255, 215, 0, 0.6)", preview: "#292929", mascot: "🎺", anim: "anim-pulse" },
+            { name: "Candy Cane", gradient: "linear-gradient(135deg, #be123c 0%, #fda4af 50%, #be123c 100%)", textMain: "#ffffff", textAccent: "#fff1f2", cardBg: "rgba(255, 255, 255, 0.2)", snowColor: "rgba(255, 255, 255, 0.9)", preview: "repeating-linear-gradient(45deg, #be123c, #be123c 10px, #fda4af 10px, #fda4af 20px)", mascot: "🍬", anim: "anim-spin" },
+            { name: "Aurora", gradient: "linear-gradient(135deg, #4c1d95 0%, #0891b2 100%)", textMain: "#ffffff", textAccent: "#22d3ee", cardBg: "rgba(0, 0, 0, 0.2)", snowColor: "rgba(165, 243, 252, 0.8)", preview: "#4c1d95", mascot: "🐻‍❄️", anim: "anim-float" },
+            { name: "Hearth", gradient: "linear-gradient(135deg, #7c2d12 0%, #ea580c 100%)", textMain: "#fff7ed", textAccent: "#fbbf24", cardBg: "rgba(0, 0, 0, 0.2)", snowColor: "rgba(255, 237, 213, 0.6)", preview: "#ea580c", mascot: "🧦", anim: "anim-wobble" },
+            { name: "Gingerbread", gradient: "linear-gradient(135deg, #5d4037 0%, #8d6e63 100%)", textMain: "#ffffff", textAccent: "#a7f3d0", cardBg: "rgba(255, 255, 255, 0.15)", snowColor: "rgba(255, 235, 205, 0.7)", preview: "#5d4037", mascot: "🍪", anim: "anim-bounce" },
+            { name: "Sugar Plum", gradient: "linear-gradient(135deg, #4a044e 0%, #c026d3 100%)", textMain: "#fae8ff", textAccent: "#f0abfc", cardBg: "rgba(255, 255, 255, 0.15)", snowColor: "rgba(245, 208, 254, 0.8)", preview: "#4a044e", mascot: "🧚‍♀️", anim: "anim-spin" },
+            { name: "Elf Workshop", gradient: "linear-gradient(135deg, #15803d 0%, #b91c1c 100%)", textMain: "#ffffff", textAccent: "#fde047", cardBg: "rgba(255, 255, 255, 0.2)", snowColor: "rgba(255, 255, 255, 0.9)", preview: "linear-gradient(45deg, #15803d 50%, #b91c1c 50%)", mascot: "🧝", anim: "anim-dance" },
+            { name: "Starry Night", gradient: "linear-gradient(135deg, #020617 0%, #172554 100%)", textMain: "#ffffff", textAccent: "#fde047", cardBg: "rgba(30, 58, 138, 0.3)", snowColor: "rgba(255, 255, 255, 0.6)", preview: "#020617", mascot: "🌠", anim: "anim-pulse" },
+            { name: "Frozen Lake", gradient: "linear-gradient(135deg, #ecfeff 0%, #0891b2 100%)", textMain: "#0e7490", textAccent: "#155e75", cardBg: "rgba(255, 255, 255, 0.6)", cardBorder: "rgba(255,255,255,0.9)", snowColor: "rgba(255, 255, 255, 1)", preview: "#ecfeff", mascot: "⛸️", anim: "anim-dance" },
+            { name: "Rudolph", gradient: "linear-gradient(135deg, #451a03 0%, #7f1d1d 100%)", textMain: "#fef2f2", textAccent: "#f87171", cardBg: "rgba(0, 0, 0, 0.3)", snowColor: "rgba(255, 255, 255, 0.8)", preview: "#451a03", mascot: "🔴", anim: "anim-pulse" },
+            { name: "Penguins", gradient: "linear-gradient(135deg, #1e293b 0%, #38bdf8 100%)", textMain: "#f0f9ff", textAccent: "#fdba74", cardBg: "rgba(255, 255, 255, 0.2)", snowColor: "rgba(255, 255, 255, 0.9)", preview: "#38bdf8", mascot: "🐧", anim: "anim-bounce" }
         ];
 
         let currentSnowColor = "rgba(255, 255, 255, 0.8)";
@@ -420,27 +211,29 @@
         
         themes.forEach((theme, index) => {
             const btn = document.createElement('button');
-            btn.className = `theme-btn w-full aspect-square rounded-lg shadow-md flex flex-col items-center justify-center gap-1 group`;
+            btn.className = `theme-btn w-full aspect-square rounded-lg shadow-md flex flex-col items-center justify-center gap-1 group relative overflow-hidden`;
             btn.style.background = theme.preview;
             btn.onclick = () => applyTheme(index);
-            
-            const label = document.createElement('span');
-            label.className = "text-[10px] font-bold text-white bg-black/40 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap overflow-hidden z-10 pointer-events-none";
-            label.innerText = theme.name;
-            
-            btn.appendChild(label);
             themeGrid.appendChild(btn);
         });
 
         function toggleThemePanel() {
-            document.getElementById('themePanel').classList.toggle('open');
+            const panel = document.getElementById('themePanel');
+            const overlay = document.getElementById('themePanelOverlay');
+            
+            if (panel.classList.contains('open')) {
+                panel.classList.remove('open');
+                overlay.classList.add('hidden');
+            } else {
+                panel.classList.add('open');
+                overlay.classList.remove('hidden');
+            }
         }
 
         function applyTheme(index) {
             const theme = themes[index];
             const root = document.documentElement;
 
-            // Visual Updates
             root.style.setProperty('--bg-gradient', theme.gradient);
             root.style.setProperty('--text-main', theme.textMain);
             root.style.setProperty('--text-accent', theme.textAccent);
@@ -453,28 +246,25 @@
                 root.style.setProperty('--card-border', 'rgba(255,255,255,0.2)');
             }
 
-            // Update Mascot
             const mascotEl = document.getElementById('themeMascot');
-            mascotEl.style.opacity = '0'; // Fade out
+            mascotEl.style.transform = "scale(0)"; // Shrink out
             setTimeout(() => {
                 mascotEl.innerText = theme.mascot;
-                mascotEl.className = `mascot-container ${theme.anim}`;
-                mascotEl.style.opacity = '1'; // Fade in
+                mascotEl.className = `mascot-container ${theme.anim} select-none`;
+                mascotEl.style.transform = "scale(1)"; // Grow in
             }, 300);
 
             currentSnowColor = theme.snowColor;
+            toggleThemePanel(); // Close panel after selection
+        }
+        
+        function pokeMascot() {
+            const mascotEl = document.getElementById('themeMascot');
+            mascotEl.style.transform = "scale(1.4) rotate(10deg)";
+            setTimeout(() => mascotEl.style.transform = "", 200);
         }
 
-        // Close panel when clicking outside
-        document.addEventListener('click', (e) => {
-            const panel = document.getElementById('themePanel');
-            const btn = document.querySelector('button[onclick="toggleThemePanel()"]');
-            if (!panel.contains(e.target) && !btn.contains(e.target) && panel.classList.contains('open')) {
-                panel.classList.remove('open');
-            }
-        });
-
-        // --- Original Countdown Logic ---
+        // --- Countdown Logic ---
         function updateCountdown() {
             const now = new Date();
             const currentYear = now.getFullYear();
@@ -498,7 +288,7 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // --- Snowfall Logic (Updated for Themes) ---
+        // --- Snowfall Logic ---
         const canvas = document.getElementById('snowCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -515,25 +305,18 @@
         resize();
 
         class Particle {
-            constructor() {
-                this.reset();
-            }
+            constructor() { this.reset(); }
             reset() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * -height;
                 this.velocity = Math.random() * 2 + 0.5;
                 this.size = Math.random() * 2 + 1;
                 this.wind = (Math.random() - 0.5) * 0.5;
-                this.angle = Math.random() * 360;
             }
             update() {
                 this.y += this.velocity;
-                this.x += this.wind + Math.sin(this.angle) * 0.5;
-                this.angle += 0.02;
+                this.x += this.wind;
                 if (this.y > height) this.reset();
-                if (this.x > width + 50 || this.x < -50) {
-                    this.x = (this.x > width) ? -50 : width + 50;
-                }
             }
             draw() {
                 ctx.beginPath();
@@ -545,7 +328,7 @@
 
         function initParticles() {
             particles = [];
-            const particleCount = Math.min(width * 0.2, 150);
+            const particleCount = Math.min(width * 0.2, 100);
             for (let i = 0; i < particleCount; i++) {
                 const p = new Particle();
                 p.y = Math.random() * height; 
@@ -555,10 +338,7 @@
 
         function animate() {
             ctx.clearRect(0, 0, width, height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
+            particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
 
